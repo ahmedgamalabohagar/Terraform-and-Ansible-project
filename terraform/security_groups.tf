@@ -10,7 +10,7 @@ resource "aws_security_group" "web_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["197.162.170.16/32"] 
+    cidr_blocks = ["197.162.170.16/32", "197.49.173.224/32"] 
   }
 
   # 2. Allow HTTP Access (Port 80)
@@ -58,7 +58,7 @@ resource "aws_security_group" "db_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["197.162.170.16/32"]
+    cidr_blocks = ["197.162.170.16/32", "197.49.173.224/32"]
   }
 
   egress {

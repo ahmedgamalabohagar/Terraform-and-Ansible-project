@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BACKUP_DIR=/var/backups/postgresql
+FILE="$BACKUP_DIR/backup_$(date +%Y%m%d_%H%M%S).sql.gz"
+
+docker exec postgres_db pg_dump -U {{ db_user }} --clean --if-exists {{ db_name }} | gzip > "$FILE"
+
+# retention: امسح اللي أقدم من 7 أيام
+find "$BACKUP_DIR" -name "backup_*.sql.gz" -mtime +7 -delete

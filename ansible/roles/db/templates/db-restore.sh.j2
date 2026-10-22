@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+FILE="${1:?Usage: db-restore.sh /path/to/backup.sql.gz}"
+
+gunzip -c "$FILE" | docker exec -i postgres_db psql -U {{ db_user }} -d {{ db_name }} -v ON_ERROR_STOP=1
