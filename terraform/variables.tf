@@ -21,3 +21,8 @@ variable "public_subnet_cidr" {
   type        = string
   default     = "10.0.1.0/24"
 }
+
+variable "key_name" {
+  description = "Name of the AWS EC2 Key Pair"
+  type        = string
+}
