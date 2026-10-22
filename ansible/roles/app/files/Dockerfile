@@ -6,8 +6,7 @@ RUN apk add --no-cache curl \
  && addgroup -S appgroup && adduser -S nodeuser -G appgroup
 
 COPY package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
-
+RUN npm install --omit=dev && npm cache clean --force
 COPY --chown=nodeuser:appgroup src ./src
 
 USER nodeuser
