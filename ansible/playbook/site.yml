@@ -1,0 +1,6 @@
+---
+- name: Test Docker Role
+  hosts: app_server
+  become: yes
+  roles:
+    - docker
