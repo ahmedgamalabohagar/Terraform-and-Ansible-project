@@ -23,12 +23,14 @@
   pre_tasks:
     - name: Wait for PostgreSQL to be reachable from the app host
       ansible.builtin.wait_for:
-        host: "{{ hostvars['db_server']['ansible_host'] | default('db_server') }}"
+        host: "{{ hostvars['db_server']['ansible_default_ipv4']['address'] }}"
         port: 5432
         timeout: 120
   roles:
     - docker
-    - app
+    - role: app
+      vars:
+        db_host: "{{ hostvars['db_server']['ansible_default_ipv4']['address'] }}"
   post_tasks:
     - name: Check that the app answers through Nginx
       ansible.builtin.uri:
