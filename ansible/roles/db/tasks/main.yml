@@ -1,0 +1,38 @@
+---
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0700"
+  loop:
+    - /opt/db-stack
+    - /var/backups/postgresql
+
+- name: Render compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /opt/db-stack/docker-compose.yml
+    mode: "0600"
+  no_log: true
+
+- name: Install backup and restore scripts
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/usr/local/bin/{{ item }}"
+    mode: "0700"
+  loop:
+    - db-backup.sh
+    - db-restore.sh
+
+- name: Start PostgreSQL and wait until healthy
+  community.docker.docker_compose_v2:
+    project_src: /opt/db-stack
+    state: present
+    wait: true
+
+- name: Schedule daily backup at 02:00
+  ansible.builtin.cron:
+    name: postgres daily backup
+    minute: "0"
+    hour: "2"
+    job: /usr/local/bin/db-backup.sh

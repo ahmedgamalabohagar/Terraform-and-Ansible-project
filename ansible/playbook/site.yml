@@ -1,6 +1,40 @@
 ---
-- name: Test Docker Role
-  hosts: app_server
-  become: yes
+- name: Wait for servers and gather facts
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Wait until SSH is available
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Gather facts
+      ansible.builtin.setup:
+
+- name: Deploy database host
+  hosts: db_server
+  become: true
   roles:
     - docker
+    - db
+
+- name: Deploy application host
+  hosts: app_server
+  become: true
+  pre_tasks:
+    - name: Wait for PostgreSQL to be reachable from the app host
+      ansible.builtin.wait_for:
+        host: "{{ hostvars['db_server']['ansible_host'] | default('db_server') }}"
+        port: 5432
+        timeout: 120
+  roles:
+    - docker
+    - app
+  post_tasks:
+    - name: Check that the app answers through Nginx
+      ansible.builtin.uri:
+        url: http://localhost/health
+        status_code: 200
+      register: health
+      until: health.status == 200
+      retries: 10
+      delay: 5

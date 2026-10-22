@@ -1,0 +1,45 @@
+---
+- name: Create app directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - /opt/app-stack
+    - /opt/app-stack/app
+    - /opt/app-stack/nginx
+
+- name: Copy Dockerfile and package files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/opt/app-stack/app/{{ item }}"
+    mode: "0644"
+  loop:
+    - Dockerfile
+    - package.json
+    - package-lock.json
+
+- name: Copy app source code
+  ansible.builtin.copy:
+    src: src
+    dest: /opt/app-stack/app/
+    mode: preserve
+
+- name: Copy Nginx config
+  ansible.builtin.copy:
+    src: nginx/conf.d
+    dest: /opt/app-stack/nginx/
+    mode: preserve
+
+- name: Render compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /opt/app-stack/docker-compose.yml
+    mode: "0600"
+  no_log: true
+
+- name: Deploy app and nginx, wait until healthy
+  community.docker.docker_compose_v2:
+    project_src: /opt/app-stack
+    state: present
+    wait: true

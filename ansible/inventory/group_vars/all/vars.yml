@@ -1,0 +1,3 @@
+db_name: notes_db
+db_user: notes_user
+db_password: "{{ vault_db_password }}"

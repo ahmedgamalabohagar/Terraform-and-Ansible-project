@@ -1,0 +1,28 @@
+services:
+  api:
+    build: ./app
+    image: notes-app:1.0
+    restart: unless-stopped
+    environment:
+      DB_HOST: {{ db_host }}
+      DB_PORT: 5432
+      DB_NAME: {{ db_name }}
+      DB_USER: {{ db_user }}
+      DB_PASSWORD: {{ db_password }}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      api:
+        condition: service_healthy

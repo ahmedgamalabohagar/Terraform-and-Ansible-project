@@ -1,0 +1,9 @@
+---
+db_stack_dir: /opt/db-stack
+db_backup_dir: /var/backups/postgresql
+db_container_name: postgres_db_container
+db_image: "postgres:15.8-alpine"
+db_port: 5432
+db_bind_ip: "{{ ansible_facts['default_ipv4']['address'] }}"
+db_backup_retention_days: 7
+db_backup_time: "02:00"
