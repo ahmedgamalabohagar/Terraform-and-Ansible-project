@@ -1,19 +1,17 @@
-# Create Security Group for Public EC2 Instances
+
 resource "aws_security_group" "web_sg" {
   name        = "${var.project_name}-web-sg"
   description = "Allow inbound traffic for SSH and Web applications"
   vpc_id      = aws_vpc.main.id
 
-  # 1. Allow SSH Access (Port 22)
   ingress {
     description = "Allow SSH from my ip"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["YOUR_IP_HERE/32"] 
+    cidr_blocks = var.allowed_ssh_cidrs 
   }
 
-  # 2. Allow HTTP Access (Port 80)
   ingress {
     description = "Allow HTTP web traffic"
     from_port   = 80
@@ -23,7 +21,6 @@ resource "aws_security_group" "web_sg" {
   }
 
 
-  # 4. Allow All Outbound Traffic (Egress)
   egress {
     description = "Allow all outbound traffic for updates and dependencies"
     from_port   = 0
@@ -58,7 +55,7 @@ resource "aws_security_group" "db_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["YOUR_IP_HERE/32"]
+    cidr_blocks = var.allowed_ssh_cidrs
   }
 
   egress {

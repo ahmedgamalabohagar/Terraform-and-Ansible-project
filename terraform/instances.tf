@@ -11,12 +11,20 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
+
+resource "aws_key_pair" "main" {
+  key_name   = "${var.project_name}-key"
+  public_key = file(pathexpand(var.public_key_path))
+}
+
+
+
 resource "aws_instance" "web_server" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t3.micro"
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
-  key_name               = var.key_name
+  key_name = aws_key_pair.main.key_name
   lifecycle {
     ignore_changes = [ami]
   }
@@ -31,10 +39,10 @@ resource "aws_instance" "db_server" {
   instance_type          = "t3.micro"
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.db_sg.id]
-  key_name               = var.key_name
+  key_name = aws_key_pair.main.key_name
 
   root_block_device {
-    volume_size           = 20 # 20 GB dedicated disk space for DB
+    volume_size           = 20 
     volume_type           = "gp3"
     delete_on_termination = false 
   }

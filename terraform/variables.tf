@@ -22,7 +22,14 @@ variable "public_subnet_cidr" {
   default     = "10.0.1.0/24"
 }
 
-variable "key_name" {
-  description = "Name of the AWS EC2 Key Pair"
+
+variable "public_key_path" {
+  description = "Path to your SSH public key"
   type        = string
+  default     = "~/.ssh/id_ed25519.pub"
+}
+
+variable "allowed_ssh_cidrs" {
+  description = "CIDRs allowed to SSH, e.g. [\"41.33.10.5/32\"]"
+  type        = list(string)
 }
