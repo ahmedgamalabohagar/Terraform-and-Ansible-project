@@ -132,7 +132,7 @@ Navigate to the `terraform` directory and destroy the main AWS infrastructure.
 
 ```bash
 cd terraform
-terraform destroy -var="key_name=your-key-pair-name" -auto-approve
+terraform destroy -auto-approve -var='allowed_ssh_cidrs=["1.1.1.1/32"]'
 ```
 
 ### Step 2: Destroy the S3 Remote Backend
