@@ -19,7 +19,6 @@ Before deploying the project, ensure you have the following installed and config
 - **AWS CLI** (v2.x) - Configured with valid credentials (`aws configure`).
 - **Terraform** (v1.0.0+) - Installed for infrastructure provisioning.
 - **Ansible** (v2.10+) - Installed for container orchestration and configuration management.
-- **SSH Key Pair** - Created on your AWS account and saved locally to access EC2 instances.
 
   ## 📂 Repository Structure
 
@@ -31,7 +30,6 @@ Before deploying the project, ensure you have the following installed and config
 │   │   ├── group_vars
 │   │   │   └── all
 │   │   │       ├── vars.yml
-│   │   │       └── vault.yml
 │   │   └── hosts.yml
 │   ├── playbook
 │   │   └── site.yml
@@ -75,7 +73,6 @@ Before deploying the project, ensure you have the following installed and config
 │               └── main.yml
 ├── bootstrap
 │   ├── main.tf
-│   └── terraform.tfstate
 ├── doc
 │   ├── architecture.png
 │   └── security-group.png
@@ -89,9 +86,6 @@ Before deploying the project, ensure you have the following installed and config
     ├── output.tf
     ├── provider.tf
     ├── security_groups.tf
-    ├── terraform.tfstate
-    ├── terraform.tfstate.backup
-    ├── terraform.tfvars
     └── variables.tf
 ```
 
@@ -106,56 +100,19 @@ The application codebase used in this project was adapted from the following rep
 
 Follow these steps sequentially to provision the remote backend, configure network access, deploy the AWS infrastructure, and generate the Ansible inventory.
 
-### Step 1: Initialize and Provision the S3 Remote Backend
-
-Navigate to the `bootstrap` directory to create the S3 bucket used to store the Terraform remote state.
+### : Run the Deployment Script
 
 ```bash
-cd bootstrap
-terraform init
-terraform apply -auto-approve
+bash scripts/deploy.sh
 ```
 
-### Step 2: Configure Your Public IP for SSH Access
+The script runs these steps in order and stops at the first error:
 
-Navigate to the `terraform` directory, retrieve your current public IPv4 address, and update the security group rules in `main.tf` to allow SSH access from your IP.
-
-```bash
-cd ../terraform
-
-MY_IP=$(curl -4 -s https://ipv4.icanhazip.com)
-
-sed -i "s|YOUR_IP_HERE|${MY_IP}|g" main.tf
-```
-
-### Step 3: Provision the AWS Infrastructure
-
-Initialize Terraform and deploy the core infrastructure, including the VPC, subnets, security groups, and EC2 instances.
-
-Replace `your-key-pair-name` with the name of your existing AWS EC2 Key Pair.
-
-```bash
-terraform init
-terraform apply -var="key_name=your-key-pair-name" -auto-approve
-```
-
-### Step 4: Generate the Dynamic Ansible Inventory
-
-Return to the project root directory and generate the Ansible inventory using Terraform outputs.
-
-```bash
-cd ..
-bash scripts/gen_inventory.sh
-```
-
-### Step 5: Configure the EC2 Instances with Ansible
-
-Run the Ansible playbook against the generated inventory.
-
-```bash
-cd ansible/
-ansible-playbook -i inventory/hosts.yml playbook/site.yml --private-key=/path/to/your-key.pem
-```
+1. Detects your current public IP (the only IP allowed to SSH to the servers).
+2. `bootstrap/`: creates the S3 bucket that stores the Terraform remote state.
+3. `terraform/`: deploys the VPC, subnet, security groups and the two EC2 instances.
+4. `scripts/gen_inventory.sh`: generates the Ansible inventory from Terraform outputs, so no IP is copied by hand.
+5. `ansible/`: waits for the servers, then runs `playbooks/site.yml`.
 
 
 ### ✅ Deployment Complete
@@ -198,6 +155,6 @@ All Terraform-managed infrastructure and the remote backend should be destroyed 
 
 **Ahmed Gamal Abohagar**
 
-- **LinkedIn:** [LinkedIn Profile](www.linkedin.com/in/ahmed-abohagar)
+- **LinkedIn:** [LinkedIn Profile](https://www.linkedin.com/in/ahmed-abohagar/)
 - **GitHub:** [ahmedgamalabohagar](https://github.com/ahmedgamalabohagar)
 
